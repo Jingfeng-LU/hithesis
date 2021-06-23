@@ -16,7 +16,7 @@
 %
 % \iffalse
 %<*driver>
-\ProvidesFile{hithesis.dtx}[2020/10/28 3.0.10 Harbin Institute of Technology Thesis Template]
+\ProvidesFile{hithesis.dtx}[2021/05/06 3.0.15 Harbin Institute of Technology Thesis Template]
 \documentclass{ltxdoc}
 \usepackage{dtx-style}
 
@@ -864,7 +864,7 @@
 % 授权页中的签名和日期是需要手写，不需要人工干预。具体示例在\file{main.tex}中。
 %\begin{latex}
 % \authorization %授权
-% %\authorization[saomiao.pdf] %添加扫描页的命令，与上互斥
+% %\authorization[scan.pdf] %添加扫描页的命令，与上互斥
 %\end{latex}
 %
 % \subsubsection{致谢声明}
@@ -1015,7 +1015,11 @@ FUNCTION {cap.th.en} 			{"th"}
 FUNCTION {cap.space}      {" "}
 FUNCTION {cap.period} 		{"\@. "}
 FUNCTION {cap.comma} 			{"\@, "}
-FUNCTION {cap.colon} 			{"\thinspace{}\textnormal{: }"}
+%    \end{macrocode}
+% 似乎GBT2005冒号前面不需要有空格，此处删除
+% \changes{v3.0.14}{2020/12/22}{似乎GBT2005冒号前面不需要有空格，此处删除}
+%    \begin{macrocode}
+FUNCTION {cap.colon} 			{"\textnormal{: }"}
 FUNCTION {cap.double.slash} 	{" //\thinspace{}"}
 FUNCTION {cap.dash} 			{"\textnormal{-}"}
 
@@ -2867,7 +2871,7 @@ EXECUTE {end.bib}                                 %   end_bib();
 %<bookcfg>\ProvidesFile{hithesisbook.cfg}
 %<artcfg>\ProvidesFile{hithesisart.cfg}
 %<hithesis-style>\ProvidesPackage{hithesis}
-%<artpluscls|artcls|bookcls|bookcfg|artcfg|hithesis-style>[2020/10/28 3.0.10 Harbin Institute of Technology Thesis Template]
+%<artpluscls|artcls|bookcls|bookcfg|artcfg|hithesis-style>[2021/05/06 3.0.15 Harbin Institute of Technology Thesis Template]
 %<*artpluscls>
 \RequirePackage{ifthen}
 \RequirePackage{kvoptions}
@@ -3821,10 +3825,22 @@ EXECUTE {end.bib}                                 %   end_bib();
 %    \begin{macrocode}
 \newif\ifhit@geometrynewone
 \newif\ifhit@geometrynewtwo
+\newif\ifhit@geometrynewno
 \define@key{hit}{newgeometry}{%
   \hit@geometrynewonefalse
   \hit@geometrynewtwofalse
+  \hit@geometrynewnofalse
   \expandafter\csname hit@geometrynew#1true\endcsname}
+%    \end{macrocode}
+% 设置字距选项，因为word和规范不一致
+% \changes{v3.0.13}{2020/11/10}{设置字距选项，因为word和规范不一致}
+%    \begin{macrocode}
+\newif\ifhit@zijvregu
+\newif\ifhit@zijvword
+\define@key{hit}{zijv}{%
+  \hit@zijvregufalse
+  \hit@zijvwordfalse
+  \expandafter\csname hit@zijv#1true\endcsname}
 %    \end{macrocode}
 % 目录中英文是否用 Arial 字体（默认关闭）。
 %    \begin{macrocode}
@@ -3919,6 +3935,11 @@ EXECUTE {end.bib}                                 %   end_bib();
 %    \begin{macrocode}
 \DeclareBoolOption[false]{splitbibitem}
 %    \end{macrocode}
+% 此处添加英文目录开关
+% \changes{v3.0.11}{2020/10/29}{此处添加英文目录开关}
+%    \begin{macrocode}
+\DeclareBoolOption[false]{engtoc}
+%    \end{macrocode}
 % 声明字体选项。
 %    \begin{macrocode}
 \DeclareStringOption{fontset}
@@ -3989,6 +4010,26 @@ EXECUTE {end.bib}                                 %   end_bib();
 %    \begin{macrocode}
     \fi
   \fi
+\fi
+%    \end{macrocode}
+% 设置字距默认选项
+% \changes{v3.0.13}{2020/11/10}{设置字距默认选项}
+%    \begin{macrocode}
+\ifhit@zijvregu\relax\else
+\ifhit@zijvword\relax\else
+\hit@zijvregutrue
+\fi
+\fi
+%    \end{macrocode}
+% 重新设置geometry的默认选项
+% \changes{v3.0.13}{2020/11/10}{重新设置geometry的默认选项}
+%    \begin{macrocode}
+\ifhit@geometrynewone\relax\else
+\ifhit@geometrynewtwo\relax\else
+\ifhit@geometrynewno\relax\else
+\hit@geometrynewtwotrue
+\fi
+\fi
 \fi
 %    \end{macrocode}
 %
@@ -4078,8 +4119,9 @@ EXECUTE {end.bib}                                 %   end_bib();
 \RequirePackage{booktabs}
 %    \end{macrocode}
 % 参考文献引用宏包。
+% \changes{v3.0.15}{2020/5/21}{删去natbib package}
 %    \begin{macrocode}
-\RequirePackage[sort&compress]{natbib}
+% \RequirePackage[sort&compress]{natbib}
 %    \end{macrocode}
 % 生成有书签的 pdf 及其开关，请结合 gbk2uni 避免书签乱码。
 %    \begin{macrocode}
@@ -4098,6 +4140,11 @@ EXECUTE {end.bib}                                 %   end_bib();
 % 设置 url 样式，与上下文一致
 %    \begin{macrocode}
 \urlstyle{same}
+%    \end{macrocode}
+% 根据窝工2021年的“四月革命”，引用文献标准更新到GBT2015
+% \changes{v3.0.15}{2020/5/21}{添加参考文献GBT2015}
+%    \begin{macrocode}
+\RequirePackage[sort&compress]{gbt7714}
 %    \end{macrocode}
 %
 % \subsection{页面设置}
@@ -4256,6 +4303,20 @@ delim_1 "\\hspace*{\\fill}"
   \@mainmatterfalse
   \pagenumbering{Roman}
   \pagestyle{hit@empty}
+%    \end{macrocode}
+% 窝工深圳模板范例，一行34个字
+% \changes{v3.0.11}{2020/10/29}{窝工深圳模板范例，一行34个字}
+% 添加33行字选项
+% \changes{v3.0.13}{2020/11/10}{添加33行字选项}
+%    \begin{macrocode}
+\ifhit@openright\cleardoublepage\else\clearpage\fi
+\ifhit@zijvword
+\ziju{0.05416667}
+\else
+\ifhit@zijvregu
+\ziju{0.05580808}
+\fi
+\fi
 }
 %    \end{macrocode}
 % \end{macro}
@@ -4645,16 +4706,18 @@ delim_1 "\\hspace*{\\fill}"
 %    \begin{macrocode}
 %<*bookcfg>
 \theorembodyfont{\normalfont}
+\theoremsymbol{\ensuremath{\square}}
 \ifhit@english
 \theoremheaderfont{\normalfont\bf}
+\newtheorem*{proof}{Proof}
 \else
 \theoremheaderfont{\normalfont\heiti}
+\newtheorem*{proof}{证明}
 \fi
 %    \end{macrocode}
 % 英文版黑体加粗
 % \changes{v3.0.0}{2020/05/21}{英文版黑体加粗}
 %    \begin{macrocode}
-\theoremsymbol{\ensuremath{\square}}
 \theoremstyle{plain}
 \theoremsymbol{}
 %    \end{macrocode}
@@ -4676,7 +4739,6 @@ delim_1 "\\hspace*{\\fill}"
 \newtheorem{problem}{Problem}[chapter]
 \newtheorem{conjecture}{Conjecture}[chapter]
 \newtheorem{fact}{Fact}[chapter]
-\newtheorem*{proof}{Proof}
 \else
 \newtheorem{assumption}{假设}[chapter]
 \newtheorem{definition}{定义}[chapter]
@@ -4691,7 +4753,6 @@ delim_1 "\\hspace*{\\fill}"
 \newtheorem{problem}{问题}[chapter]
 \newtheorem{conjecture}{猜想}[chapter]
 \newtheorem{fact}{事实}[chapter]
-\newtheorem*{proof}{证明}
 \fi
 %</bookcfg>
 %<*artcfg>
@@ -4982,7 +5043,10 @@ delim_1 "\\hspace*{\\fill}"
 %    \begin{macrocode}
 \renewcommand{\thesubtable}{(\alph{subtable})}
 \renewcommand{\thefigure}{\arabic{chapter}-\arabic{figure}}%使图编号为 7-1 的格式 %\protect{~}
-\renewcommand{\thesubfigure}{\alph{subfigure})}%使子图编号为 a)的格式
+%    \end{macrocode}
+% \changes{v3.0.15}{2020/5/21}{根据窝工2021“四月革命”之精神，修改字图为双括号} 
+%    \begin{macrocode}
+\renewcommand{\thesubfigure}{(\alph{subfigure})}%使子图编号为 a)的格式
 \renewcommand{\p@subfigure}{\thefigure~} %使子图引用为 7-1 a) 的格式，母图编号和子图编号之间用~加一个空格
 \renewcommand{\thetable}{\arabic{chapter}-\arabic{table}}%使表编号为 7-1 的格式
 %    \end{macrocode}
@@ -5533,6 +5597,12 @@ delim_1 "\\hspace*{\\fill}"
 \hit@def@term{cdate}
 \hit@def@term{cnumber}
 \hit@def@term{cpositionname}
+%    \end{macrocode}
+% 添加博后封皮选项
+% \changes{v3.0.12}{2020/11/02}{添加博后封皮选项}
+%    \begin{macrocode}
+\hit@def@term{cfinishdate}
+\hit@def@term{csubmitdate}
 \hit@def@term{cstartdate}
 \hit@def@term{cenddate}
 %    \end{macrocode}
@@ -5627,7 +5697,11 @@ delim_1 "\\hspace*{\\fill}"
 
 
 \def\hit@postdoc@number{编号}
-\def\hit@postdoc@documenttitle{博\hspace{0.5\ccwd}士\hspace{0.5\ccwd}后\hspace{0.5\ccwd}研\hspace{0.5\ccwd}究\hspace{0.5\ccwd}工\hspace{0.5\ccwd}作\hspace{0.5\ccwd}报\hspace{0.5\ccwd}告}
+%    \end{macrocode}
+% 更改博后封皮中字间距
+% \changes{v3.0.12}{2020/11/02}{更改博后封皮中字间距}
+%    \begin{macrocode}
+\def\hit@postdoc@documenttitle{博\hspace{0.58\ccwd}士\hspace{0.58\ccwd}后\hspace{0.58\ccwd}研\hspace{0.58\ccwd}究\hspace{0.58\ccwd}工\hspace{0.58\ccwd}作\hspace{0.58\ccwd}报\hspace{0.58\ccwd}告}
 \def\hit@postdoc@documenttitlenospace{博士后研究工作报告}
 \def\hit@postdoc@finishdate{工作完成日期}
 \def\hit@postdoc@submitdate{报告提交日期}
@@ -5891,17 +5965,16 @@ delim_1 "\\hspace*{\\fill}"
 \def\hit@second@titlepage{%
   \ifhit@postdoc\hit@second@titlepage@postdoc\else\ifhit@bachelor\hit@second@titlepage@bachelor\else\hit@second@titlepage@other\fi\fi}
 
+%    \end{macrocode}
+% 添加博后封皮选项
+% \changes{v3.0.12}{2020/11/02}{添加博后封皮选项}
+%    \begin{macrocode}
 \newcommand{\hit@first@titlepage@postdoc}{
-  {\songti\sihao\renewcommand{\arraystretch}{2}
-    \hspace{1cm}\begin{tabular}{@{}r@{}l@{}}
-      \hit@postdoc@classifiedindex&\underline{\makebox[6\ccwd]{\hit@natclassifiedindex}}\\
-      \hit@postdoc@UDC&\underline{\makebox[6\ccwd]{\hit@intclassifiedindex}}\\
-    \end{tabular}}\hfill
-  {\songti\sihao\renewcommand{\arraystretch}{2}
-    \begin{tabular}{@{}r@{}l@{}}
-      \hit@postdoc@secretlevel&\underline{\makebox[6\ccwd]{\hit@statesecrets}}\\
-      \hit@postdoc@number&\underline{\makebox[6\ccwd]{\hit@cnumber}}\\
-    \end{tabular}\hspace{1cm}\renewcommand{\arraystretch}{1}}
+  {\songti\sihao\renewcommand{\arraystretch}{2}\
+    \begin{tabular}{@{}r@{}l@{\hspace{7\ccwd}}r@{}l@{\hspace{3em}}r}
+      \hit@postdoc@classifiedindex&\underline{\makebox[6\ccwd]{\hit@natclassifiedindex}}&\hit@postdoc@secretlevel&\underline{\makebox[6\ccwd]{\hit@statesecrets}}&\\
+      \hit@postdoc@UDC&\underline{\makebox[6\ccwd]{\hit@intclassifiedindex}}&\hit@postdoc@number&\underline{\makebox[6\ccwd]{\hit@cnumber}}&\\
+    \end{tabular}\renewcommand{\arraystretch}{1}}
   \parbox[t][5cm][b]{\textwidth}{\begin{center}\heiti\xiaoer[2]\hit@cschoolname\par
       \hit@postdoc@documenttitle\end{center}}
   \parbox[b][4cm][b]{\textwidth}{
@@ -5921,8 +5994,8 @@ delim_1 "\\hspace*{\\fill}"
     \songti\sihao[2]\renewcommand{\arraystretch}{1.5}
     \begin{center}
       \begin{tabular}{rl}
-        \hit@postdoc@finishdate & \underline{\makebox[6cm]{}}\\
-        \hit@postdoc@submitdate & \underline{\makebox[6cm]{}}\\
+        \hit@postdoc@finishdate & \underline{\makebox[6cm]{\hit@cfinishdate}}\\
+        \hit@postdoc@submitdate & \underline{\makebox[6cm]{\hit@csubmitdate\hfill}}\\
       \end{tabular}\renewcommand{\arraystretch}{1}
     \end{center}
     }
@@ -6125,9 +6198,11 @@ delim_1 "\\hspace*{\\fill}"
  \vspace*{1.2cm}
 \begin{center}
   \begin{center}\xiaoyi[1]\songti\textbf{\hit@cxuewei\hit@cthesisname}\end{center}
-    \ifhit@fulltime\vspace{1.4cm}\else%
-      \begin{center}\xiaoyi[1]\songti\textbf{\hit@cbraceleft\hit@cstudenttype\hit@cbraceright}\end{center}
-    \fi%
+%    \end{macrocode}
+% 修改第二行标题
+% \changes{v3.0.15}{2021/05/06}{修改第二行标题}
+%    \begin{macrocode}
+      \begin{center}\xiaoer[1]\songti\textbf{\hit@cbraceleft\hit@cstudenttype\hit@cbraceright}\end{center}
     \parbox[t][7.8cm][t]{\textwidth}{%
   \begin{center}\erhao\heiti\hit@ctitlecover\end{center}
 \ifhit@subtitle\begin{center}\hspace{-4em}\xiaoer\heiti\pozhehao\hit@csubtitle\end{center}\fi
@@ -6160,8 +6235,7 @@ delim_1 "\\hspace*{\\fill}"
     \end{tabular}}
   \parbox[t][3.2cm][t]{\textwidth}{\begin{center} \end{center} }
     \parbox[t][2.4cm][t]{\textwidth}{\xiaoer[1]
-  \begin{center}\songti\bfseries\hit@cdegree\hit@cthesisname\end{center}
-      \ifhit@fulltime\relax\else\begin{center}\songti\textbf{\hit@cbraceleft\hit@cstudenttype\hit@cbraceright}\end{center}\fi}
+  \begin{center}\songti\bfseries\hit@cdegree\hit@cthesisname\end{center}}
 	\parbox[t][5cm][t]{\textwidth}{\erhao
   \begin{center}\heiti\hit@ctitlecover\end{center}
 \ifhit@subtitle\begin{center}\hspace{-4em}\xiaoer\heiti\pozhehao\hit@csubtitle\end{center}\fi}
@@ -6371,6 +6445,14 @@ delim_1 "\\hspace*{\\fill}"
 \normalsize\@starttoc{toc}
 \ifhit@doctor
 \tableofengcontents
+%    \end{macrocode}
+% 有些硕士的范例中带有英文目录，这里添加手动开关
+% \changes{v3.0.11}{2020/10/29}{有些硕士的范例中带有英文目录，这里添加手动开关}
+%    \begin{macrocode}
+\else
+\ifhit@engtoc
+\tableofengcontents
+\fi
 \fi
 %    \end{macrocode}
 % 将英文目录潜入中文目录命令中，进一步简化thesis.tex结构
@@ -6605,11 +6687,15 @@ delim_1 "\\hspace*{\\fill}"
 }
 
 \newcommand\bibstyle@numerical{\bibpunct{[}{]}{,}{s}{,}{\textsuperscript{,}}}
-\newcommand\bibstyle@authoryear{\bibpunct{(}{)}{;}{a}{,}{,}}
+%    \end{macrocode}
+% 删除inline等定义，此命令与7144package冲突
+% \changes{v3.0.15}{2021/05/06}{删除inline等定义，此命令与7144package冲突}
+%    \begin{macrocode}
+% \newcommand\bibstyle@authoryear{\bibpunct{(}{)}{;}{a}{,}{,}}
 %    \end{macrocode}
 % \changes{v2.0.6}{2018/12/5}{在\cs{inlinecite}内添加空格}
 %    \begin{macrocode}
-\newcommand\bibstyle@inline{\bibpunct{[}{]}{,}{n}{,}{\hit@inline@sep}}
+% \newcommand\bibstyle@inline{\bibpunct{[}{]}{,}{n}{,}{\hit@inline@sep}}
 \citestyle{numerical}
 \DeclareRobustCommand\inlinecite{\@inlinecite}
 \def\@inlinecite#1{\begingroup\citestyle{inline}\let\@cite\NAT@citenum\citep{#1}\endgroup}
